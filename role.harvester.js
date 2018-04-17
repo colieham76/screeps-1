@@ -65,13 +65,13 @@ var roleHarvester = {
         } else if(creep.memory.source != null) {
             var containers = creep.room.find(FIND_STRUCTURES, {
                 filter: (structure) => structure.structureType == STRUCTURE_CONTAINER
-            }).length;
+            });
             var range = creep.pos.getRangeTo(Game.getObjectById(creep.memory.source));
             if(range > 1) {
                 creep.moveTo(Game.getObjectById(creep.memory.source));
             } else {
                 creep.harvest(Game.getObjectById(creep.memory.source))
-                if(containers < 3) { // minimum available containers to build by source in any room
+                if(containers.length == 0) { // minimum available containers to build by source in any room
                     var cx = creep.pos.x;
                     var cy = creep.pos.y;
                     for(let x=-1; x<=1; x++) {
@@ -86,7 +86,6 @@ var roleHarvester = {
                         filter: (cs) => {return cs.structureType == STRUCTURE_CONTAINER}
                     });
                     creep.build(constructions[0]);
-                    
                 } else {
                     var emptycontainers = creep.room.find(FIND_STRUCTURES, {
                         filter: (structure) => { return ((structure.structureType == STRUCTURE_CONTAINER) &&
