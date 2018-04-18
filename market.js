@@ -56,9 +56,9 @@ var market = {
             var room = Game.rooms[name];            
             if (room.terminal) {
                 sellMinerals(5000);
-                if(room.name == 'W24N8') {
+                /*if(room.name == 'W24N8') {
                     buyEnergy(1000);
-                }
+                }*/
             }
         }
 
