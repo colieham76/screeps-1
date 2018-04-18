@@ -1,8 +1,15 @@
 var roleLorry = { // transfer stuff
-
     /** @param {Creep} creep */
     run: function(creep) {
         
+        const visualPath = { 
+            fill: 'transparent',
+            stroke: '#00ffff',
+            lineStyle: 'dashed',
+            strokeWidth: .1,
+            opacity: .8
+        };
+
         var minerals = creep.room.find(FIND_MINERALS);
         var mineralsType = minerals[0].mineralType;       
                 
@@ -45,32 +52,33 @@ var roleLorry = { // transfer stuff
 
         } else { // to
             var extentions = creep.room.find(FIND_STRUCTURES, {
-                    filter: (s) => {return (s.structureType == STRUCTURE_EXTENSION && s.energy < s.energyCapacity);}
-                });
+                filter: (s) => {return (s.structureType == STRUCTURE_EXTENSION && s.energy < s.energyCapacity);}
+            });
             var towers = creep.room.find(FIND_STRUCTURES, {
-                    filter: (s) => {return (s.structureType == STRUCTURE_TOWER && s.energy < s.energyCapacity);}
-                });
-
+                filter: (s) => {return (s.structureType == STRUCTURE_TOWER && s.energy < s.energyCapacity);}
+            });
+            
             if(extentions.length > 0) {
                 var ext = creep.pos.findClosestByPath(extentions);
                 if(creep.transfer(ext,RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(ext);
+                    creep.moveTo(ext, {visualizePathStyle: visualPath});
                 }
             } else if(towers.length > 0) {
                 var tower = creep.pos.findClosestByPath(towers);
                 if(creep.transfer(tower,RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(tower);
+                    creep.moveTo(tower, {visualizePathStyle: visualPath});
                 }
+                console.log(creep.transfer(tower,RESOURCE_ENERGY))
             } else if (terminal != undefined 
                     && creep.transfer(terminal, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE
                     && terminal.store.energy < 150000
                     ) {
-                creep.moveTo(terminal);               
+                creep.moveTo(terminal, {visualizePathStyle: visualPath});               
             } else if (storage != undefined && 
                     terminal != undefined &&
                     storage.store.energy < storage.store.energyCapacity &&
                     creep.transfer(storage,RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(storage);
+                creep.moveTo(storage, {visualizePathStyle: visualPath});
             }
 
         }

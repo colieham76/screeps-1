@@ -115,7 +115,8 @@ var spawning = {
                 });
                 var minHarvesters = roomLinks.length > 1 ? 1 : 2;
                 var minUpgraders = minHarvesters - 1;
-                var minBuilders = room.name == 'W24N8' ? 2 : 1;
+                //var minBuilders = room.name == 'W24N8' ? 2 : 1;
+                var minBuilders = 1;
 
                 function getMaxHarvester() {
                     var factor = Math.floor(room.energyAvailable / 100);
