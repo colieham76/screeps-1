@@ -41,13 +41,10 @@ var roleLorry = { // transfer stuff
                     creep.moveTo(terminal);
                 }
             } else { //step away from harvester's spot
-                var c = creep.room.find(FIND_STRUCTURES, {
-                    filter: (s) => {return (s.structureType == STRUCTURE_CONTAINER);}
-                }); 
-                if(c.length > 0) {
-                    var pos = new RoomPosition(c[0].pos.x,c[0].pos.y,creep.room.name);
-                    creep.moveTo(pos);
-                }
+                var spawn = creep.room.find(FIND_STRUCTURES, {
+                    filter: (s) => { return (s.structureType == STRUCTURE_SPAWN); }
+                });
+                creep.moveTo(spawn[0]);
             }
 
         } else { // to
@@ -55,8 +52,9 @@ var roleLorry = { // transfer stuff
                 filter: (s) => {return (s.structureType == STRUCTURE_EXTENSION && s.energy < s.energyCapacity);}
             });
             var towers = creep.room.find(FIND_STRUCTURES, {
-                filter: (s) => {return (s.structureType == STRUCTURE_TOWER && s.energy < s.energyCapacity);}
+                filter: (s) => {return (s.structureType == STRUCTURE_TOWER && s.energy < s.energyCapacity/2);}
             });
+            //console.log(towers.length,creep.room.name)
             
             if(extentions.length > 0) {
                 var ext = creep.pos.findClosestByPath(extentions);
@@ -68,22 +66,20 @@ var roleLorry = { // transfer stuff
                 if(creep.transfer(tower,RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(tower, {visualizePathStyle: visualPath});
                 }
-                console.log(creep.transfer(tower,RESOURCE_ENERGY))
+                
             } else if (terminal != undefined 
                     && creep.transfer(terminal, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE
                     && terminal.store.energy < 150000
                     ) {
                 creep.moveTo(terminal, {visualizePathStyle: visualPath});               
-            } else if (storage != undefined && 
-                    terminal != undefined &&
-                    storage.store.energy < storage.store.energyCapacity &&
-                    creep.transfer(storage,RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(storage, {visualizePathStyle: visualPath});
+            } else if (storage !== undefined) {
+                if(creep.transfer(storage,RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(storage, {visualizePathStyle: visualPath});
+                }
             }
-
+            
         }
 
     }
 };
-
 module.exports = roleLorry;

@@ -115,8 +115,10 @@ var spawning = {
                 });
                 var minHarvesters = roomLinks.length > 1 ? 1 : 2;
                 var minUpgraders = minHarvesters - 1;
+                
                 //var minBuilders = room.name == 'W24N8' ? 2 : 1;
-                var minBuilders = 1;
+                //var minBuilders = 1;
+                var minBuilders = room.find(FIND_CONSTRUCTION_SITES).length > 0 ? 1 : 0;
 
                 function getMaxHarvester() {
                     var factor = Math.floor(room.energyAvailable / 100);
@@ -127,7 +129,27 @@ var spawning = {
                     }
                     return p;
                 }
+                
+                function getMaxUpgrader() {
+                    var factor = Math.floor(room.energyAvailable / 100);
+                    factor = factor > 8 ? 8 : factor;
+                    var p = [WORK,WORK,CARRY,MOVE];                    
+                    for(let i=0; i<factor; i++) {
+                        p.unshift(WORK);
+                    }
+                    return p;
+                }
 
+                function getMaxLorry() {
+                    var factor = Math.floor(room.energyAvailable / 50);
+                    factor = factor > 5 ? 5 : factor;
+                    var p = [CARRY,MOVE];                    
+                    for(let i=0; i<factor; i++) {
+                        p.unshift(CARRY);
+                    }
+                    return p;
+                }
+               
                 function myspawn(role) {
                     var creepName = role.charAt(0) + Game.time;
                     if(role == 'harvester') {
@@ -142,11 +164,21 @@ var spawning = {
                 if(harvesters.length < minHarvesters) {
                     myspawn('harvester');
                 } else if(lorries.length < 1) {
-                    myspawn('lorry');
+                    if (room.name != 'W28N8') {
+                        myspawn('lorry');
+                    } else {
+                        var lp = getMaxLorry();
+                        spawn.spawnCreep(lp,'l' + Game.time,{memory: {role: 'lorry', origin: room.name}});
+                    }
                 /*} else if(killers.length < Memory.minOfKillers) {
                     myspawn('killer',3);*/
                 } else if(upgraders.length < minUpgraders) {
-                    myspawn('upgrader');
+                    if (room.name != 'W28N8') {
+                        myspawn('upgrader');
+                    } else {
+                        var up = getMaxUpgrader();
+                        spawn.spawnCreep(up,'u' + Game.time,{memory: {role: 'upgrader', origin: room.name}});
+                    }
                 } else if(builders.length < minBuilders) {
                     myspawn('builder');
                 }/*else if((arhs.length<1) && (room.name == 'W24N8')) {

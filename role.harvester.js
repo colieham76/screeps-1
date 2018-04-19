@@ -91,9 +91,21 @@ var roleHarvester = {
                         filter: (structure) => { return ((structure.structureType == STRUCTURE_CONTAINER) &&
                             (structure.store.energy < structure.storeCapacity)) }
                     });
-                    if(creep.transfer(creep.pos.findClosestByPath(emptycontainers), RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(creep.pos.findClosestByPath(emptycontainers));
+                    if(emptycontainers.length > 0) {
+                        if(creep.transfer(creep.pos.findClosestByPath(emptycontainers), RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(creep.pos.findClosestByPath(emptycontainers));
+                        }
+                    } else {
+                        var ext = creep.pos.findClosestByPath(FIND_STRUCTURES,{
+                            filter: (ext) => { return ext.structureType == STRUCTURE_EXTENSION }
+                        });
+                        if(ext != undefined) {
+                            if(creep.transfer(ext,RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                                creep.moveTo(ext);
+                            }
+                        }
                     }
+                    
                 }
 
             }
