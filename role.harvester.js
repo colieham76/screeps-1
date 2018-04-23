@@ -57,7 +57,7 @@ var roleHarvester = {
                         }
                     }
                 } else { // just take the closest energy source as your favorite
-                    creep.memory.source = creep.room.findClosestByPath(FIND_SOURCES).id;
+                    creep.memory.source = creep.pos.findClosestByRange(FIND_SOURCES).id;
                 }
             }
             creep.memory.init = false;
@@ -67,25 +67,29 @@ var roleHarvester = {
                 filter: (structure) => structure.structureType == STRUCTURE_CONTAINER
             });
             var range = creep.pos.getRangeTo(Game.getObjectById(creep.memory.source));
+
+            function spawnFiveContainers(creep) {
+                var cx = creep.pos.x;
+                var cy = creep.pos.y;
+                for(let x=-1; x<=1; x++) {
+                    for(let y=-1; y<=1; y++) {
+                        creep.room.createConstructionSite(cx+x, cy+y, STRUCTURE_CONTAINER);
+                    }
+                }
+            }
+
             if(range > 1) {
                 creep.moveTo(Game.getObjectById(creep.memory.source));
             } else {
-                creep.harvest(Game.getObjectById(creep.memory.source))
-                if(containers.length == 0) { // minimum available containers to build by source in any room
-                    var cx = creep.pos.x;
-                    var cy = creep.pos.y;
-                    for(let x=-1; x<=1; x++) {
-                        for(let y=-1; y<=1; y++) {
-                            if(creep.room.lookForAt(LOOK_CONSTRUCTION_SITES,cx+x,cy+y).length == 0 &&
-                                    creep.room.lookForAt(LOOK_STRUCTURES,cx+x,cy+y).length == 0) {
-                                creep.room.createConstructionSite(cx+x, cy+y, STRUCTURE_CONTAINER);
-                            }
-                        }
+                creep.harvest(Game.getObjectById(creep.memory.source));
+                if(containers.length < 5) { 
+                    spawnFiveContainers(creep);
+                    if(containers.length == 0) { // builder will build the rest four ones if needed
+                        var constructions = creep.room.find(FIND_CONSTRUCTION_SITES, {
+                            filter: (cs) => {return cs.structureType == STRUCTURE_CONTAINER}
+                        });
+                        creep.build(constructions[0]);
                     }
-                    var constructions = creep.room.find(FIND_CONSTRUCTION_SITES, {
-                        filter: (cs) => {return cs.structureType == STRUCTURE_CONTAINER}
-                    });
-                    creep.build(constructions[0]);
                 } else {
                     var emptycontainers = creep.room.find(FIND_STRUCTURES, {
                         filter: (structure) => { return ((structure.structureType == STRUCTURE_CONTAINER) &&

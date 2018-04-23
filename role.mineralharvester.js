@@ -1,8 +1,6 @@
 var roleMineralHarvester = {
-
     /** @param {Creep} creep */
     run: function(creep) {
-
         var minerals = creep.room.find(FIND_MINERALS)[0];
         var mineralsType = minerals.mineralType;
 
@@ -31,7 +29,7 @@ var roleMineralHarvester = {
                 }
             } else if(creep.harvest(minerals) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(minerals, {visualizePathStyle: {stroke: '#ffaa00'}});
-            } 
+            }
         } else if(creep.room.terminal != undefined) { // transfer harvested stuff
             if( (creep.room.terminal.store[mineralsType] < creep.room.terminal.storeCapacity/2) ||
                 (creep.room.terminal.store[mineralsType] == undefined)) { // in case there is no minerals in store

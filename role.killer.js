@@ -13,17 +13,16 @@ var roleKiller = {
         }
         var roompos = new RoomPosition(13,43,roomName);
 
-        if(Memory.minOfKillers == undefined) {
-            Memory.minOfKillers = 0;
-            minOfKillers = 'W24N8';
+        if(Memory.killerNeeded == undefined) {
+            Memory.killerNeeded = 0;
+            minOfKillers = 0;
         } else {
-            minOfKillers = Memory.minOfKillers;
+            minOfKillers = Memory.killerNeeded;
         }
 
-        var killers = _.filter(Game.creeps, (creep) => 
-            { return ((creep.memory.role == 'killer')
-            && (creep.pos.roomName == roomName))});
-
+        var killers = _.filter(Game.creeps, (creep) => { 
+            return ((creep.memory.role == 'killer') && (creep.pos.roomName == roomName))
+        });
 
         if(creep.hits < creep.hitsMax) {
             creep.heal(creep);
