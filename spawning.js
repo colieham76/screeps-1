@@ -135,8 +135,11 @@ var spawning = {
                     var builders = _.filter(Game.creeps, (creep) => { 
                         return ((creep.memory.role == 'builder') && (creep.pos.roomName == room.name))
                     });
+                    /*
                     var minBuilders = room.find(FIND_CONSTRUCTION_SITES).length > 0 ? 1 : 0;
-                    return ( minBuilders == 1 && builders.length == 0) ? 1 : 0;
+                    return (minBuilders == 1 && builders.length == 0) ? 1 : 0;
+                    */
+                    return builders.length == 0 ? 1 : 0;
                 }
 
                 function lorryNeeded(room) {
@@ -179,7 +182,7 @@ var spawning = {
 
                 function arhNeeded(room) {
                     var arhs = _.filter(Game.creeps, (creep) => { 
-                        return ((creep.memory.role == 'adjroomharvester') && (creep.memory.origin == room.name))
+                        return (creep.memory.role == 'adjroomharvester' && creep.memory.origin == room.name)
                     });
                     return arhs.length == 0 ? 1 : 0;
                 }
@@ -191,9 +194,9 @@ var spawning = {
                     for(let x=-1;x<=1;x++) {
                         for(let y=-1;y<=1;y++) {
                             if(x!=0||y!=0) {
-                                сx += x;
-                                сy += y;
-                                var str = "w" + String(сx) + "n" + String(сy);
+                                var tx = cx + x;
+                                var ty = сy + y;
+                                var str = "w" + String(tx) + "n" + String(ty);
                                 if(Game.rooms[str] == undefined) { // room is not visible;
                                     return str;
                                 } else if(Game.rooms[str].controller.my == false &&
@@ -228,8 +231,14 @@ var spawning = {
                 } else if(lorryNeeded(room)) {
                     myspawn('lorry');
                 /*} else if(killerNeeded(room)) {
-                    spawn.spawnCreep([ATTACK,MOVE],'k'+Game.time,{memory: {role: 'killer', origin: room.name}});
-                    */
+                    spawn.spawnCreep([MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
+                                      ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,
+                                      //ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,
+                                      //ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,
+                                      ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK],
+                                      'k'+Game.time,
+                                      {memory: {role: 'killer', origin: room.name}});
+                  */ 
                 } else if(upgraderNeeded(room)) {
                     myspawn('upgrader');
                 } else if(buildersNeeded(room)) {
@@ -245,12 +254,12 @@ var spawning = {
                 } /*else if(claimerNeeded(room)) { 
                     spawn.spawnCreep([CLAIM,MOVE],'c'+ Game.time,
                         {memory: {role: 'claimer', origin: room.name});
-                } else*/ if(arhNeeded(room)) { 
-                    spawn.spawnCreep([WORK,CARRY,MOVE],'arh'+ Game.time,
-                        {memory: {role: 'adjroomharvester', origin: room.name}});
+                } else*/
+                 if(arhNeeded(room)) { 
+                    myspawn('adjroomharvester');
                 } else if(room.storage.store.energy > 900000) {
                     myspawn('upgrader');
-                }
+                } 
 
             } // spawn spawning
         } // room
@@ -267,6 +276,7 @@ var spawning = {
                 case 'mineralharvester': roleMineralHarvester.run(creep); break;
                 case 'lorry': roleLorry.run(creep); break;
                 case 'killer': roleKiller.run(creep); break;
+                case 'claimer': roleClaimer.run(creep); break;
                 default: break;
             }
         }

@@ -28,29 +28,21 @@ var roleLorry = { // transfer stuff
 
         if(creep.memory.harvesting) { // from                            
             var containers = creep.room.find(FIND_STRUCTURES, {
-                filter: (s) => {return (s.structureType == STRUCTURE_CONTAINER && s.store.energy > 0 );}
-            });   
-            var dropped = creep.room.find(FIND_DROPPED_RESOURCES, {
-                filter: (s) => { return (s.resourceType == RESOURCE_ENERGY && s.amount >= creep.carryCapacity-creep.carry.energy); }
+                filter: (s) => {return (s.structureType == STRUCTURE_CONTAINER && s.store.energy > creep.carryCapacity );}
             });
-
-            if(dropped.length > 0) {
-                var d = creep.pos.findClosestByPath(dropped);
-                if(creep.pickup(d) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(d, {visualizePathStyle: visualPath});
+            
+            if(containers.length > 0) {
+                containers.sort((a,b) => b.store.energy - a.store.energy);
+                if(creep.withdraw(containers[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(containers[0], {visualizePathStyle: visualPath});
                 }
-            } else if(containers.length > 0) {
-                var c = creep.pos.findClosestByPath(containers);
-                if(creep.withdraw(c, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(c, {visualizePathStyle: visualPath});
+             } else if(storage!=undefined && storage.store.energy > 0) {
+                if(creep.withdraw(storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(storage, {visualizePathStyle: visualPath});
                 }
             } else if(terminal!=undefined && terminal.store.energy > 1000) {
                 if(creep.withdraw(terminal, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(terminal, {visualizePathStyle: visualPath});
-                }
-            } else if(storage!=undefined && storage.store.energy > 0) {
-                if(creep.withdraw(storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(storage, {visualizePathStyle: visualPath});
                 }
             } else { //step away from harvester's spot
                 var spawn = creep.room.find(FIND_STRUCTURES, {

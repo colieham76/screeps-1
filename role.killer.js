@@ -31,6 +31,13 @@ var roleKiller = {
         if(creep.pos.roomName != roomName) {
             creep.moveTo(roompos, {visualizePathStyle: {stroke: '#ffffff'}});
         } else {
+            var commontarget = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+                    if(commontarget) {
+                        if(creep.attack(commontarget) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(commontarget);
+                        }
+                    }/*
+            
             var healer = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS, {
                 filter: function(obj) {
                     return obj.getActiveBodyparts(HEAL) > 0;
@@ -79,7 +86,9 @@ var roleKiller = {
                         }
                     }
                 }
-            }
+            }*/
+
+
         }//if room
 	}//run: function(creep) {
 }; // var roleKiller = {

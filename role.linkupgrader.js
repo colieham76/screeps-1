@@ -26,10 +26,29 @@ var roleLinkUpgrader = {
         } else {
             if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {                
                 creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#ffffff'}});
+            } else {
+                var tombs = creep.room.find(FIND_TOMBSTONES, {
+                    filter: (tomb) => {
+                        return (tomb.store.energy > 0);
+                    }
+                });
+                var t = false;
+                
+                for(let i = 0; i<tombs.length; i++){
+                    if(tombs[i].pos == creep.pos) {
+                        t = true;
+                    }
+                }
+                if(t) {
+                    creep.withdraw(tombs[i],RESOURCE_ENERGY);
+                } else {
+                    if (creep.withdraw(Game.getObjectById(creep.memory.link),RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(Game.getObjectById(creep.memory.link), {visualizePathStyle: {stroke: '#ff00ff'}});
+                    }
+                }
+
             }
-            if (creep.withdraw(Game.getObjectById(creep.memory.link),RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(Game.getObjectById(creep.memory.link), {visualizePathStyle: {stroke: '#ff00ff'}});
-            }
+
         }
 	}
 };

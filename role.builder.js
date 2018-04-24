@@ -57,60 +57,64 @@ var roleBuilder = {
                     }
                 
                 } else { // energy spending:
-                        var targets = creep.room.find(FIND_CONSTRUCTION_SITES);   
-                        var urgentrepcontainers = creep.room.find(FIND_STRUCTURES, {
-                            filter: (s) => {
-                                return s.structureType == STRUCTURE_CONTAINER && s.hits < s.hitsMax / 3;
-                            }
-                        });                
-                        var urgentwallsramparts = creep.room.find(FIND_STRUCTURES, {
-                            filter: (s) => {
-                                return (s.structureType == STRUCTURE_RAMPART || s.structureType == STRUCTURE_WALL) && s.hits < 1000;
-                            }
-                        });              
-                        var reptargets = creep.room.find(FIND_STRUCTURES, {
-                            filter: (s) => {
-                                return s.structureType != STRUCTURE_WALL 
-                                    && s.structureType != STRUCTURE_RAMPART 
-                                    && s.hits < s.hitsMax;
-                            }
-                        });       
-                        var wallsramparts = creep.room.find(FIND_STRUCTURES, {
-                            filter: (s) => {
-                                return (s.structureType == STRUCTURE_RAMPART || s.structureType == STRUCTURE_WALL) 
-                                    && s.hits < Memory.wallsHP;
-                            }
-                        });  
-                        
-                        if(urgentrepcontainers.length > 0) {
-                            urgentrepcontainers.sort((a,b) => a.hits - b.hits);
-                            if(creep.repair(urgentrepcontainers[0]) == ERR_NOT_IN_RANGE) {
-                                creep.moveTo(urgentrepcontainers[0], {visualizePathStyle: visualPath});
-                            }
-                        } else if(urgentwallsramparts.length > 0) {
-                            urgentwallsramparts.sort((a,b) => a.hits - b.hits);
-                            if(creep.repair(urgentwallsramparts[0]) == ERR_NOT_IN_RANGE) {
-                                creep.moveTo(urgentwallsramparts[0], {visualizePathStyle: visualPath});
-                            }                    
-                        } else if(targets.length > 0) {
-                            var bt = creep.pos.findClosestByPath(targets);
-                            if(creep.build(bt) == ERR_NOT_IN_RANGE) {
-                                creep.moveTo(bt, {visualizePathStyle: visualPath});                    
-                            }
-                        } else if(reptargets.length > 0) {
-                            reptargets.sort((a,b) => a.hits - b.hits);
-                            if(creep.repair(reptargets[0]) == ERR_NOT_IN_RANGE) {
-                                creep.moveTo(reptargets[0], {visualizePathStyle: visualPath});
-                            }                    
-                        } else if(wallsramparts.length > 0) { // repair walls to full
-                            wallsramparts.sort((a,b) => a.hits - b.hits);
-                            if(creep.repair(wallsramparts[0]) == ERR_NOT_IN_RANGE) {
-                                creep.moveTo(wallsramparts[0], {visualizePathStyle: visualPath});
-                            }
-                        } else if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(creep.room.controller, {visualizePathStyle: visualPath});
+                    var targets = creep.room.find(FIND_CONSTRUCTION_SITES);   
+                    var urgentrepcontainers = creep.room.find(FIND_STRUCTURES, {
+                        filter: (s) => {
+                            return s.structureType == STRUCTURE_CONTAINER && s.hits < s.hitsMax / 3;
                         }
-
+                    });                
+                    var urgentwallsramparts = creep.room.find(FIND_STRUCTURES, {
+                        filter: (s) => {
+                            return (s.structureType == STRUCTURE_RAMPART || s.structureType == STRUCTURE_WALL) && s.hits < 2000;
+                        }
+                    });              
+                    var reptargets = creep.room.find(FIND_STRUCTURES, {
+                        filter: (s) => {
+                            return s.structureType != STRUCTURE_WALL 
+                                && s.structureType != STRUCTURE_RAMPART 
+                                && s.hits < s.hitsMax-creep.carryCapacity;
+                        }
+                    });       
+                    var wallsramparts = creep.room.find(FIND_STRUCTURES, {
+                        filter: (s) => {
+                            return (s.structureType == STRUCTURE_RAMPART || s.structureType == STRUCTURE_WALL) 
+                                && s.hits < Memory.wallsHP;
+                        }
+                    });  
+                    
+                    if(urgentrepcontainers.length > 0) {
+                        urgentrepcontainers.sort((a,b) => a.hits - b.hits);
+                        if(creep.repair(urgentrepcontainers[0]) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(urgentrepcontainers[0], {visualizePathStyle: visualPath});
+                        }
+                    } else if(urgentwallsramparts.length > 0) {
+                        urgentwallsramparts.sort((a,b) => a.hits - b.hits);
+                        if(creep.repair(urgentwallsramparts[0]) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(urgentwallsramparts[0], {visualizePathStyle: visualPath});
+                        }                    
+                    } else if(targets.length > 0) {
+                        var bt = creep.pos.findClosestByRange(targets);
+                        if(creep.build(bt) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(bt, {visualizePathStyle: visualPath});                    
+                        }
+                    } else if(reptargets.length > 0) {
+                        var rt = creep.pos.findClosestByRange(reptargets);
+                        if(creep.repair(rt) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(rt, {visualizePathStyle: visualPath});
+                        }                    
+                    } else if(wallsramparts.length > 0) { // repair walls to full
+                        /*wallsramparts.sort((a,b) => a.hits - b.hits);
+                        if(creep.repair(wallsramparts[0]) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(wallsramparts[0], {visualizePathStyle: visualPath});
+                        }*/
+                        var wr = creep.pos.findClosestByRange(wallsramparts);
+                        if(creep.repair(wr) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(wr, {visualizePathStyle: visualPath});
+                        }
+                        
+                    } else if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(creep.room.controller, {visualizePathStyle: visualPath});
+                    }
                     
                 }
             } else { // get energy (pick up)            
@@ -146,7 +150,7 @@ var roleBuilder = {
                             creep.moveTo(tomb, {visualizePathStyle: visualPath});
                         }
                     }
-                } else if((creep.room.storage != undefined) && (creep.room.storage.store.energy > 0)) {
+                } else if(creep.room.storage != undefined && creep.room.storage.store.energy > 0) {
                     if(creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(creep.room.storage, {visualizePathStyle: visualPath});
                     }
@@ -154,7 +158,7 @@ var roleBuilder = {
                     if (creep.withdraw(creep.pos.findClosestByPath(containers),RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(creep.pos.findClosestByPath(containers), {visualizePathStyle: visualPath});
                     }
-                } else if((creep.room.terminal != undefined) && (creep.room.terminal.store.energy > 2000)) {
+                } else if(creep.room.terminal != undefined && creep.room.terminal.store.energy > 2000) {
                     if(creep.withdraw(creep.room.terminal, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(creep.room.terminal, {visualizePathStyle: visualPath});
                     }

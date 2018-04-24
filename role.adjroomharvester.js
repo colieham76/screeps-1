@@ -12,18 +12,18 @@ var roleAdjRoomHarvester = { // transfer stuff
 
         function getRoomToHarvest(room) {
             var rn = room.name;
-            var сx = parseInt(rn.split(/[wsen]/)[1]);
-            var сy = parseInt(rn.split(/[wsen]/)[2]);
+            var сx = parseInt(rn.split(/[WSENwsen]/)[1]);
+            var сy = parseInt(rn.split(/[WSENwsen]/)[2]);
             for(let x=-1;x<=1;x++) {
                 for(let y=-1;y<=1;y++) {
                     if(x!=0||y!=0) {
-                        сx += x;
-                        сy += y;
-                        var str = "w" + String(сx) + "n" + String(сy);
+                        var tx = сx + x;
+                        var ty = сy + y;
+                        var str = "W" + tx.toString() + "N" + ty.toString();
                         if(Game.rooms[str] == undefined) { // room is not visible
-                            return str;
+                            if(str!='W23N7'){ return str; }
                         } else if(Game.rooms[str].controller.my == false) {
-                            return str;
+                            if(str!='W23N7'){ return str; }
                         }
                     }
                 }
@@ -38,7 +38,10 @@ var roleAdjRoomHarvester = { // transfer stuff
             if(creep.memory.harvesting) {
                 if(creep.pos.roomName == creep.memory.target) {
                     if(creep.memory.source == undefined) {
-                        creep.memory.source = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE).id;
+                        var source = creep.pos.findClosestByRange(FIND_SOURCES_ACTIVE);
+                        if(source != undefined) {
+                            creep.memory.source = source.id;
+                        }
                     } else if(creep.harvest(Game.getObjectById(creep.memory.source)) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(Game.getObjectById(creep.memory.source), {visualizePathStyle: visualPath});
                     }
@@ -51,11 +54,11 @@ var roleAdjRoomHarvester = { // transfer stuff
                 }
             } else if(!creep.memory.harvesting) {
                 if(creep.pos.roomName == creep.memory.origin) {
-                    if(creep.transfer(creep.room.storage,RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    if(creep.transfer(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(creep.room.storage, {visualizePathStyle: visualPath});
                     }
                 } else {
-                    var exit = creep.room.findExitTo(creep.room.origin);
+                    var exit = creep.room.findExitTo(creep.memory.origin);
                     creep.moveTo(creep.pos.findClosestByRange(exit), {visualizePathStyle: visualPath});
                 }
                 if(creep.carry.energy == 0) {
