@@ -128,17 +128,23 @@ var spawning = {
                     var roomLinks = room.find(FIND_STRUCTURES,{ 
                         filter: (s) => s.structureType == STRUCTURE_LINK
                     });
-                    return (upgraders.length == 0 && roomLinks.length < 2) ? 1 : 0;
+                    if(room.name=='W24N8') {
+                        return (upgraders.length == 0) ? 1 : 0;
+                    } else {
+                        return (upgraders.length == 0 && roomLinks.length < 2) ? 1 : 0;
+                    }                    
                 }
 
                 function buildersNeeded(room) {
                     var builders = _.filter(Game.creeps, (creep) => { 
                         return ((creep.memory.role == 'builder') && (creep.pos.roomName == room.name))
                     });
+                    
                     /*
                     var minBuilders = room.find(FIND_CONSTRUCTION_SITES).length > 0 ? 1 : 0;
                     return (minBuilders == 1 && builders.length == 0) ? 1 : 0;
                     */
+                   
                     return builders.length == 0 ? 1 : 0;
                 }
 
@@ -180,11 +186,44 @@ var spawning = {
                     return (killers.length == 0 && Memory.killerNeeded == 1) ? 1 : 0;
                 }
 
+                function isHarvestable(roomName) { 
+                    var room = Game.rooms[roomName];
+                    return (room != undefined &&// room should be visible
+                            room.controller != undefined && // room has controller
+                            room.controller.my == false && // not already mine
+                            room.controller.owner == undefined && // has no owner 
+                           (room.controller.reservation == undefined || // no reservation
+                            room.controller.reservation.username == 'danikine')); // or reserved by me
+                }
+            
+                function getRoomToHarvest(room) {
+                    var rn = room.name;
+                    var сx = parseInt(rn.split(/[WSENwsen]/)[1]);
+                    var сy = parseInt(rn.split(/[WSENwsen]/)[2]);
+                    var directions = [[7,1],[5,3]];
+                    for(let i=0; i<=1; i++) {
+                        for(let j=0; j<=1; j++) {
+                            var tx = сx + (i&&j) - (+!i&&!j); // adjacent rooms left,right,top,bottom
+                            var ty = сy + j - i;
+                            var str = "W" + tx.toString() + "N" + ty.toString(); 
+                            if(room.findExitTo(Game.rooms[str]) == directions[i,j]) {
+                                if(Game.rooms[str] == undefined) { // room is not visible
+                                    return str;
+                                } else if(isHarvestable(str)) {
+                                    return str;
+                                }
+                            }
+                        }
+                    }
+                    return false;
+                }
+
                 function arhNeeded(room) {
                     var arhs = _.filter(Game.creeps, (creep) => { 
                         return (creep.memory.role == 'adjroomharvester' && creep.memory.origin == room.name)
                     });
-                    return arhs.length == 0 ? 1 : 0;
+                    var roomToHarvest = getRoomToHarvest(room);
+                    return (arhs.length == 0 && roomToHarvest) ? roomToHarvest : false;
                 }
 
                 function getAdjRoomToClaim(room) {
@@ -214,7 +253,7 @@ var spawning = {
                         return ((creep.memory.role == 'claimer') && (creep.memory.origin == room.name))
                     });
                     var roomToClaim = getAdjRoomToClaim(room);
-                    return (roomToClaim != null && claimers.length == 0) ? 1 : 0;
+                    return (roomToClaim != null && claimers.length == 0) ? true : false;
                 }
 
                 function myspawn(role) {
@@ -251,15 +290,18 @@ var spawning = {
                 } else if(luNeeded(room)) {
                     spawn.spawnCreep(luParts,'lu'+ Game.time,
                         { memory: {role: 'linkupgrader', origin: room.name} });
-                } /*else if(claimerNeeded(room)) { 
+                } /*
+                  else if(claimerNeeded(room)) { 
                     spawn.spawnCreep([CLAIM,MOVE],'c'+ Game.time,
                         {memory: {role: 'claimer', origin: room.name});
-                } else*/
-                 if(arhNeeded(room)) { 
-                    myspawn('adjroomharvester');
+                }*/ 
+                  /*else if(arhNeeded(room)) { 
+                    spawn.spawnCreep(lhParts,'lh'+ Game.time,
+                        { memory: {role: 'adjroomharvester', origin: room.name, target:getRoomToHarvest(room) } });
+
                 } else if(room.storage.store.energy > 900000) {
                     myspawn('upgrader');
-                } 
+                }*/
 
             } // spawn spawning
         } // room

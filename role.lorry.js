@@ -40,7 +40,7 @@ var roleLorry = { // transfer stuff
                 if(creep.withdraw(storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(storage, {visualizePathStyle: visualPath});
                 }
-            } else if(terminal!=undefined && terminal.store.energy > 1000) {
+            } else if(terminal!=undefined && terminal.store.energy > 2000) {
                 if(creep.withdraw(terminal, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(terminal, {visualizePathStyle: visualPath});
                 }
