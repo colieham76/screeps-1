@@ -54,15 +54,21 @@ var market = {
         }
 
         for (let name in Game.rooms) {
-            var room = Game.rooms[name];            
+            
+            var room = Game.rooms[name];
             if (room.terminal) {
-                sellMinerals(room,5000);
-                if(room.name == 'W24N8' && room.terminal.store.energy > 1111) {
-                    buyEnergy(room,1000);
+                var te = room.terminal.store.energy;
+                if(te > 1000) {
+                    if(te > 50000) {
+                        sellMinerals(room,1000);
+                    } else if (Game.market.credits > 2000) {
+                        buyEnergy(room,1000);
+                    }
                 }
             }
-        }
 
+        }
+        
     }
 }
 module.exports = market;
