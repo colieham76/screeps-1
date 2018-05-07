@@ -52,12 +52,19 @@ var roleLorry = { // transfer stuff
             }
 
         } else { // to
-            var extentions = creep.room.find(FIND_STRUCTURES, {
-                filter: (s) => { return (s.structureType == STRUCTURE_EXTENSION && s.energy < s.energyCapacity); }
+
+            var room = creep.room;
+            var extentions = room.find(FIND_STRUCTURES, {
+                filter: (s) => { return ((s.structureType == STRUCTURE_EXTENSION ||
+                        s.structureType == STRUCTURE_SPAWN)
+                         && s.energy < s.energyCapacity); }
             });
-            var towers = creep.room.find(FIND_STRUCTURES, {
+            var towers = room.find(FIND_STRUCTURES, {
                 filter: (s) => { return (s.structureType == STRUCTURE_TOWER && s.energy < s.energyCapacity-300); }
             });
+            var labs = room.find(FIND_STRUCTURES, {
+                filter: (s) => { return (s.structureType == STRUCTURE_LAB && s.energy < s.energyCapacity); }
+            })
             
             if(extentions.length > 0) {
                 var ext = creep.pos.findClosestByPath(extentions);
@@ -69,7 +76,12 @@ var roleLorry = { // transfer stuff
                 if(creep.transfer(tower,RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(tower, {visualizePathStyle: visualPath});
                 }
-            } else if (terminal != undefined 
+            } else if(labs.length > 0) {
+                var lab = creep.pos.findClosestByPath(labs);
+                if(creep.transfer(lab,RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(lab, {visualizePathStyle: visualPath});
+                }
+            } else if(terminal != undefined 
                     && terminal.store.energy < 100000
                     && creep.transfer(terminal, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE
                     ) {

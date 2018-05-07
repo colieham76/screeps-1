@@ -1,74 +1,97 @@
 var market = {    
     run: function() {
 
-        function buyEnergy(room,amountToBuy) {
-            var orders = Game.market.getAllOrders({type: ORDER_SELL, resourceType: RESOURCE_ENERGY});
+        function sell(room,resourceType,amount) {
+            var orders = Game.market.getAllOrders({type: ORDER_BUY, resourceType: resourceType});
+            if (orders.length > 0){
+                var bestTrans = Game.market.calcTransactionCost(amount, room.name, orders[0].roomName);
+                var bestEndPrice = (orders[0].price * amount) / (amount - bestTrans);
+                var bestOrder = orders[0];
+                for (i=0; i<orders.length; i++) {
+                    bestTrans = Game.market.calcTransactionCost(amount, room.name, orders[i].roomName);
+                    var newBestEndPrice = (orders[i].price * amount) / (amount - bestTrans);
+                    if (newBestEndPrice < bestEndPrice) {
+                        bestEndPrice = newBestEndPrice;
+                        bestOrder = orders[i];
+                    }
+                }
+                return Game.market.deal(bestOrder.id, amount, room.name);
+            }
+            
+        }
+
+        function buy(room,resourceType,amount) {
+            var orders = Game.market.getAllOrders({type: ORDER_SELL, resourceType: resourceType});
             if(orders.length > 0) {
-                var bestTransCost = Game.market.calcTransactionCost(amountToBuy, room.name, orders[0].roomName);
+                var bestTransCost = Game.market.calcTransactionCost(amount, room.name, orders[0].roomName);
                 var bestPriceTrCostOrder = orders[0];
-                var bestEndPrice = (orders[0].price * amountToBuy) / (amountToBuy - bestTransCost);
+                var bestEndPrice = (orders[0].price * amount) / (amount - bestTransCost);
                 var bestEndPriceOrder = orders[0];
                 for(i=0; i < orders.length; i++) {
-                    var newBestTransCost = Game.market.calcTransactionCost(amountToBuy, room.name, orders[i].roomName);
-                    var tbestEndPrice = (orders[i].price * amountToBuy) / (amountToBuy - newBestTransCost);
+                    var newBestTransCost = Game.market.calcTransactionCost(amount, room.name, orders[i].roomName);
+                    var tbestEndPrice = (orders[i].price * amount) / (amount - newBestTransCost);
                     if (tbestEndPrice < bestEndPrice) {
                         bestEndPrice = tbestEndPrice;
                         bestEndPriceOrder = orders[i];
                     }
                 }
             }                   
-            if (room.terminal.store.energy < room.terminal.storeCapacity/3) {
-                return Game.market.deal(bestEndPriceOrder.id,amountToBuy,room.name);
-            }
+            return Game.market.deal(bestEndPriceOrder.id,amount,room.name);
         }
 
-        function sellMinerals(room,amountToSell) {            
-            var minerals = room.find(FIND_MINERALS);
-            if(minerals.length > 0) {
-                var mineralType = minerals[0].mineralType;
-                var orders = Game.market.getAllOrders({type: ORDER_BUY, resourceType: mineralType});
-                if (orders.length > 0){
-                    var bestOrder = orders[0];                    
-                    var bestTrans = Game.market.calcTransactionCost(amountToSell, room.name, orders[0].roomName);
-                    var bestEndPrice = (orders[0].price * amountToSell) / (amountToSell - bestTrans);
-                    for (i=0; i<orders.length; i++) {
-                        BestTrans = Game.market.calcTransactionCost(amountToSell, room.name, orders[i].roomName);
-                        var newBestEndPrice = (orders[i].price * amountToSell) / (amountToSell - BestTrans);
-                        if (newBestEndPrice < bestEndPrice) {
-                            bestEndPrice = newBestEndPrice;
-                            bestOrder = orders[i];
-                        }
-                    }
-                    var bestEndPriceOrderTransCont = Game.market.calcTransactionCost(amountToSell, room.name, bestOrder.roomName);
-                    
-                    /*console.log(room.name+' Price: '+bestOrder.price.toFixed(3)+' transfer cost: '
-                    +bestEndPriceOrderTransCont+' to sell '+amountToSell+ ' of '+ mineralType);
-    */
-                    //console.log('best price per 1: '+ mineralType+ ' is '+ bestEndPrice);
+        const resourceTypes = [
+            RESOURCE_CATALYZED_UTRIUM_ACID, // ATTACK
+            RESOURCE_CATALYZED_LEMERGIUM_ALKALIDE, // HEAL
+            RESOURCE_CATALYZED_ZYNTHIUM_ALKALIDE, // MOVE
+            RESOURCE_CATALYZED_GHODIUM_ALKALIDE, // TOUGH
+            RESOURCE_CATALYZED_KEANIUM_ALKALIDE, // RANGED ATTACK
+            RESOURCE_CATALYZED_ZYNTHIUM_ACID // DISMANTLE
+        ];
 
-                    if (room.terminal.store.energy >= bestEndPriceOrderTransCont) {
-                        Game.market.deal(bestOrder.id, amountToSell, room.name);
-                    }
+        function getLabsResourceAmount(room,resourceType) {
+            var labs = room.find(FIND_STRUCTURES, {
+                filter: (s) => s.structureType == STRUCTURE_LAB
+            });
+            var amount = 0;
+            for(lab of labs) {
+                if(lab.mineralType == resourceType) {
+                    amount += lab.mineralAmount;
+                }
+            }
+            return amount;
+        }
+        
+        function checkBuy(room, resourceType, amount) {                        
+            if(room.terminal != undefined) {
+                var x = room.terminal.store[resourceType];
+                var labsAmount = getLabsResourceAmount(room,resourceType);
+                //console.log(resourceType + ' : ' + labsAmount);
+                if( x == undefined || x < amount ) {
+                    buy(room, resourceType, 30);
                 }
             }
         }
 
         for (let name in Game.rooms) {
-            
             var room = Game.rooms[name];
             if (room.terminal) {
-                var te = room.terminal.store.energy;
-                if(te > 1000) {
-                    if(te > 50000) {
-                        sellMinerals(room,1000);
-                    } else if (Game.market.credits > 2000) {
-                        buyEnergy(room,1000);
+                if(room.terminal.store.energy > 1000) {
+                    if(room.terminal.store.energy > 2000 && room.find(FIND_MINERALS).length > 0) {
+                        sell(room,room.find(FIND_MINERALS)[0].mineralType,1000);
                     }
+                    if(room.name == 'W23N9') {
+                        for(resourceType of resourceTypes) {
+                            checkBuy(room,resourceType,600);
+                        }
+                    }
+                    
                 }
             }
-
         }
+
+
         
+
     }
 }
 module.exports = market;

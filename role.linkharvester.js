@@ -23,22 +23,34 @@ var findSourceLink = function(room) { // returns IDs of source and link near it
 var roleLinkHarvester = {
     /** @param {Creep} creep */
     run: function(creep) {
-        if (creep.memory.init == undefined) {
-            creep.memory.link = findSourceLink(creep.room).link;
-            creep.memory.source = findSourceLink(creep.room).source;
-            creep.memory.init = false;
-        } else {
-            if ((creep.memory.source !== undefined) && (creep.carry.energy < creep.carryCapacity-(2*creep.getActiveBodyparts(WORK)))) {
-                if(creep.harvest(Game.getObjectById(creep.memory.source)) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(Game.getObjectById(creep.memory.source), {visualizePathStyle: {stroke: '#ffffff'}});
+
+        if(creep.memory.target == undefined || creep.pos.roomName == creep.memory.target) {
+            if (creep.memory.init == undefined) {
+                var res = findSourceLink(creep.room);
+                if(res!=null) {
+                    creep.memory.link = res.link;
+                    creep.memory.source = res.source;
+                    creep.memory.init = false;
                 }
-            } 
-            if (creep.memory.link !== undefined) {
-                if (creep.transfer(Game.getObjectById(creep.memory.link),RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(Game.getObjectById(creep.memory.link), {visualizePathStyle: {stroke: '#ffffff'}});
+            } else {
+                if ((creep.memory.source != undefined) && (creep.carry.energy < creep.carryCapacity-(2*creep.getActiveBodyparts(WORK)))) {
+                    if(creep.harvest(Game.getObjectById(creep.memory.source)) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(Game.getObjectById(creep.memory.source), {visualizePathStyle: {stroke: '#ffffff'}});
+                    }
+                } 
+                if (creep.memory.link != undefined) {
+                    if (creep.transfer(Game.getObjectById(creep.memory.link),RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(Game.getObjectById(creep.memory.link), {visualizePathStyle: {stroke: '#ffffff'}});
+                    }
                 }
             }
+            
+        } else {
+            var tarpos = new RoomPosition(25,25,creep.memory.target);
+            creep.moveTo(tarpos);
         }
+
+        
 	}
 };
 module.exports = roleLinkHarvester;

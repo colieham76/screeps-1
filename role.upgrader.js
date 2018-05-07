@@ -24,7 +24,7 @@ var roleUpgrader = {
                 }
             }
         } else { //find energy
-            var energyStructures = creep.room.find(FIND_STRUCTURES, {
+            /*var energyStructures = creep.room.find(FIND_STRUCTURES, {
                 filter: (s) => {
                     return ((s.structureType == STRUCTURE_CONTAINER) && (s.store.energy > 0))
                 }
@@ -33,10 +33,10 @@ var roleUpgrader = {
                 if (creep.withdraw(creep.pos.findClosestByPath(energyStructures),RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(creep.pos.findClosestByPath(energyStructures));
                 }
-            /*} else if((creep.room.storage != undefined) && (creep.room.storage.store.energy > 0)) {
+            } else */if((creep.room.storage != undefined) && (creep.room.storage.store.energy > 2000)) {
                 if(creep.withdraw(creep.room.storage,RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(creep.room.storage);
-                }*/
+                }
             } else {
                 var source = creep.pos.findClosestByPath(FIND_SOURCES);
                 if(creep.harvest(source) == ERR_NOT_IN_RANGE) {

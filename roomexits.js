@@ -34,8 +34,6 @@ var roomexits = {
                     var str = "W" + tx.toString() + "N" + ty.toString();
                     if(room.findExitTo(str) == directions[i][j]) {
                         room.memory.exits[directions[i][j]] = true;
-                    } else {
-                        room.memory.exits[directions[i][j]] = false;
                     }
                 }
             }
@@ -55,11 +53,14 @@ var roomexits = {
                 var tx = сx + (i&&j) - (+!i&&!j); // adjacent rooms left,right,top,bottom
                 var ty = сy + j - i;
                 var str = "W" + tx.toString() + "N" + ty.toString(); 
-                if(roomexits.hasExit(roomName,directions[i][j])) {
-                    if(Game.rooms[str] == undefined) { // room is not visible
-                        rooms.push(str);
-                    } else if(roomexits.isHarvestable(str)) {
-                        rooms.push(str);
+                if( tx%10!=0 && ty%10!=0 && roomexits.hasExit(roomName,directions[i][j]) ) {
+                    if((Game.rooms[str] == undefined)||(roomexits.isHarvestable(str))) {
+                        var arhs = _.filter(Game.creeps, (creep) => { 
+                            return (creep.memory.role == 'adjroomharvester' && creep.memory.target == str)
+                        });
+                        if(arhs.length == 0) {
+                            rooms.push(str);
+                        }
                     }
                 }
             }
@@ -78,8 +79,13 @@ var roomexits = {
                 var ty = сy + j - i;
                 var str = "W" + tx.toString() + "N" + ty.toString(); 
                 if(roomexits.hasExit(roomName,directions[i][j]) &&
-                        roomexits.isClaimable(str)) {
-                    rooms.push(str);
+                        roomexits.isClaimable(str)) { // only visible rooms where arhs are already working
+                    var claimers = _.filter(Game.creeps, (creep) => {
+                        return (creep.memory.role == 'claimer' && creep.memory.target == str)
+                    });
+                    if(claimers.length == 0) {
+                        rooms.push(str);
+                    }
                 }
             }
         }

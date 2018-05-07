@@ -3,6 +3,7 @@ var spawning = require('spawning');
 var towers = require('towers');
 var links = require('links');
 var labs = require('labs');
+var memory = require('memory');
 
 module.exports.loop = function () {
     spawning.run();
@@ -10,4 +11,6 @@ module.exports.loop = function () {
     market.run();
     links.run();
     labs.run();
+    memory.run();
+    
 }

@@ -41,17 +41,17 @@ const visualPath = {
 var roleHarvester = {
     /** @param {Creep} creep */
     run: function(creep) {
-        if(creep.memory.init == undefined) { // choose the source to harvest for life
+        if(creep.memory.source == undefined) {
             if(hasLinks(creep.room)) {
                 creep.memory.source = getNotLinkSource(creep.room);
             } else {
-                var harvester = creep.room.find(FIND_MY_CREEPS, {
+                var harvesters = creep.room.find(FIND_MY_CREEPS, {
                     filter: (c) => c.memory.source != undefined
                 });
-                if(harvester.length > 0) { // there is already a harvester with a source in his memory
+                if(harvesters.length > 0) { // there is already a harvester with a source in his memory
                     var sources = creep.room.find(FIND_SOURCES);
-                    for(let s of sources) {
-                        if(s.id != harvester[0].memory.source) {
+                    for(s of sources) {
+                        if(s.id != harvesters[0].memory.source) {
                             creep.memory.source = s.id;
                             break;
                         }
@@ -60,13 +60,11 @@ var roleHarvester = {
                     creep.memory.source = creep.pos.findClosestByRange(FIND_SOURCES).id;
                 }
             }
-            creep.memory.init = false;
-
         } else if(creep.memory.source != null) {
+            var src = Game.getObjectById(creep.memory.source); 
             var containers = creep.room.find(FIND_STRUCTURES, {
                 filter: (structure) => structure.structureType == STRUCTURE_CONTAINER
             });
-            var range = creep.pos.getRangeTo(Game.getObjectById(creep.memory.source));
 
             function spawnFiveContainers(creep) {
                 var cx = creep.pos.x;
@@ -78,26 +76,26 @@ var roleHarvester = {
                 }
             }
 
-            if(range > 1) {
-                creep.moveTo(Game.getObjectById(creep.memory.source));
+            if(!creep.pos.isNearTo(src)) {
+                creep.moveTo(src);
             } else {
-                creep.harvest(Game.getObjectById(creep.memory.source));
-                if(containers.length < 5) { 
-                    spawnFiveContainers(creep);
-                    if(containers.length == 0) { // builder will build the rest four ones if needed
-                        var constructions = creep.room.find(FIND_CONSTRUCTION_SITES, {
-                            filter: (cs) => {return cs.structureType == STRUCTURE_CONTAINER}
-                        });
-                        creep.build(constructions[0]);
-                    }
+                creep.harvest(src);
+                if(containers.length == 0) { // builder will build the rest four ones if needed
+                    var constructions = creep.room.find(FIND_CONSTRUCTION_SITES, {
+                        filter: (cs) => {return cs.structureType == STRUCTURE_CONTAINER}
+                    });
+                    creep.build(constructions[0]);
                 } else {
+                    if(containers.length < 5) {
+                        spawnFiveContainers(creep);
+                    }
                     var emptycontainers = creep.room.find(FIND_STRUCTURES, {
                         filter: (structure) => { return ((structure.structureType == STRUCTURE_CONTAINER) &&
                             (structure.store.energy < structure.storeCapacity)) }
                     });
                     if(emptycontainers.length > 0) {
-                        if(creep.transfer(creep.pos.findClosestByPath(emptycontainers), RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(creep.pos.findClosestByPath(emptycontainers));
+                        if(creep.transfer(creep.pos.findClosestByRange(emptycontainers), RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(creep.pos.findClosestByRange(emptycontainers));
                         }
                     } else {
                         var ext = creep.pos.findClosestByPath(FIND_STRUCTURES,{
